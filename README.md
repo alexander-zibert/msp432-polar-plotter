@@ -7,7 +7,9 @@ SML is versioned with the code.
 YAHAL has to be deployed seperately and is by default expected under `vendor/YAHAL`.
 However, this can be configured with the variable `YAHAL_DIR` in the `Makefile`.
 The Polar-Plotter also needs the `arm-none-eabi` toolchain to compile the source code.
-Additionally, the `DSLITE` tool is required, which is part of TI's Code Composer Studio.
+Additionally, the DSLITE tool is required to upload the binary to the MSP432.
+DSLITE is part of [TI's Code Composer Studio](https://software-dl.ti.com/ccs/esd/documents/ccs_downloads.html).
+After installing CCS, you can change the DSLITE variable in the `Makefile` to the installation location.
 
 ## Compilation
 
