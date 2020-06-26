@@ -27,12 +27,6 @@ LINK_LIBS = $(YAHAL_DIR)/libYAHAL_msp432.a
 FLAGS_CXX = -Wall -Wextra -pedantic -pedantic-errors -fno-threadsafe-statics -fno-exceptions -std=c++2a
 # FLAGS_CXX = -Wall -Wextra -fno-threadsafe-statics -fno-exceptions -std=c++14
 
-# Unix commands
-RM        = rm -f
-RMDIR     = rm -rf
-MKDIR     = mkdir -p
-MAKE      = make
-ERRIGNORE = 2>/dev/null
 
 
 ##########################
@@ -61,10 +55,6 @@ LN_SCRIPT_FLASH = msp432p401r.lds
 FLAGS_LD        = -Wl,-T$(MSP_INC_DIR)/$(LN_SCRIPT_FLASH)
 FLAGS_LD       += -Wl,-Map,$(basename $(TARGET)).map
 FLAGS_LD       += -Wl,--gc-sections
-
-#################################################
-# The following variables are used by common.mk #
-#################################################
 
 # Cross-tools
 #############
@@ -128,6 +118,13 @@ INCLUDES += $(foreach dir, $(PLATFORM_INC_DIRS), -I$(dir))
 #####################
 ### RULES section ###
 #####################
+
+# Unix commands
+RM        = rm -f
+RMDIR     = rm -rf
+MKDIR     = mkdir -p
+MAKE      = make
+ERRIGNORE = 2>/dev/null
 
 # Indicate to make which targets are not files
 .PHONY: all clean directories
