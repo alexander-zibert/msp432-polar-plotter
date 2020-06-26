@@ -1,0 +1,4 @@
+*.out
+*.map
+build/*
+.vscode/
