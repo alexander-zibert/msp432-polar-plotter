@@ -46,7 +46,7 @@ FLAGS_F		   += -fno-strict-aliasing
 FLAGS_M        += -mcpu=cortex-m4 -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mabi=aapcs
 FLAGS_DEBUG    += #-g -gdwarf-3 -gstrict-dwarf
 FLAGS_WARN     += -Wall -Wextra
-FLAGS_OPT      += -Os
+FLAGS_OPT      += -O2 -s
 
 FLAGS_C         =
 FLAGS_ASM       =
@@ -70,8 +70,8 @@ CXXFLAGS = $(FLAGS_F) $(FLAGS_M) $(FLAGS_DEBUG) $(FLAGS_WARN) $(FLAGS_OPT) $(FLA
 CFLAGS   = $(FLAGS_F) $(FLAGS_M) $(FLAGS_DEBUG) $(FLAGS_WARN) $(FLAGS_OPT) $(FLAGS_C)
 ASMFLAGS = $(FLAGS_M) $(FLAGS_DEBUG) $(FLAGS_ASM)
 LDFLAGS  = $(CXXFLAGS) $(FLAGS_LD) $(LIBS)
-#LIBS     = -lstdc++ -lgcc -lc -lm -lnosys
-LIBS     = -lstdc++_nano -lgcc -lc_nano -lm -lnosys
+LIBS     = -lstdc++ -lgcc -lc -lm -lnosys
+#LIBS     = -lstdc++_nano -lgcc -lc_nano -lm -lnosys
 
 # Compiler defines
 ##################
