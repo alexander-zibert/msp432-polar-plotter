@@ -18,11 +18,23 @@ After installing CCS, you can change the DSLITE variable in the `Makefile` to th
 The project can be compiled by running:
 
 ```
-make
+make msp432
 ```
 
 The project can be uploaded to the MSP432 by running:
 
 ```
 make upload
+```
+
+The unit tests can be executed with:
+
+```
+make test
+```
+
+The build and test files can be cleaned up by running:
+
+```
+make clean
 ```
