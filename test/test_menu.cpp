@@ -28,3 +28,11 @@ TEST_CASE("items can be retrieved") {
   REQUIRE(std::string{items[0]} == "foo");
   REQUIRE(std::string{items[1]} == "bar");
 }
+
+TEST_CASE("weird") {
+  enum class menu_items { DRAW, PLOT, NUM_ITEMS };
+  MATSE::MCT::Menu<menu_items, menu_items::DRAW> menu{{"foo", "bar"}};
+  REQUIRE(std::string(menu.getCurrentItem()) == "foo");
+  menu.down();
+  REQUIRE(std::string(menu.getCurrentItem()) == "bar");
+}

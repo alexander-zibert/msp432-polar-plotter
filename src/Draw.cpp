@@ -1,30 +1,43 @@
 #include "Machine.hpp"
 
 namespace MATSE::MCT {
-state Draw::handle(event e) noexcept {
-  switch (current) {
-  case draw_state::DEFAULT:
-    return handleDefault(e);
-  case draw_state::MENU:
-    return handleMenu(e);
-  }
-}
+
 state Draw::handle(Joystick rawEvent) noexcept {
   if (current == draw_state::DEFAULT) {
-    return handleDefault(rawEvent);
+    return ID;
   }
   return ID;
 }
-
-state Draw::handleMenu(event e) noexcept {
-  switch (e) {
-  case event::JOYSTICK_UP:
-    menu.up();
+state Draw::handle(joystick_down) noexcept {
+  if (current == draw_state::DEFAULT) {
     return ID;
-  case event::JOYSTICK_DOWN:
+  }
+  if (current == draw_state::MENU) {
     menu.down();
+    drawer->print(menu.getCurrentItem());
+    drawer->print("\n");
     return ID;
-  case event::A_BUTTON_UP: {
+  }
+  return ID;
+}
+state Draw::handle(joystick_up) noexcept {
+  if (current == draw_state::DEFAULT) {
+    return ID;
+  }
+  if (current == draw_state::MENU) {
+    menu.up();
+    drawer->print(menu.getCurrentItem());
+    drawer->print("\n");
+    return ID;
+  }
+  return ID;
+}
+state Draw::handle(a_button_up) noexcept {
+  if (current == draw_state::DEFAULT) {
+    isPressed = !isPressed;
+    return ID;
+  }
+  if (current == draw_state::MENU) {
     auto currentMenuItem = menu.getCurrent();
     switch (currentMenuItem) {
     case menu_items::BACK:
@@ -39,35 +52,23 @@ state Draw::handleMenu(event e) noexcept {
     case menu_items::EXIT:
       return state::START;
     default:
-      break;
+      return ID;
     }
-    menu.reset();
-    return ID;
   }
-  case event::B_BUTTON_UP: {
-    current = draw_state::DEFAULT;
-    // revert to prev display state
-    return ID;
-  }
-  default:
-    return ID;
-  }
+  return ID;
 }
-state Draw::handleDefault(event e) noexcept {
-  switch (e) {
-  case event::A_BUTTON_UP: {
-    isPressed = !isPressed;
-    return ID;
-  }
-  case event::B_BUTTON_UP: {
+state Draw::handle(b_button_up) noexcept {
+  if (current == draw_state::DEFAULT) {
     current = draw_state::MENU;
-    // draw menu
+    drawer->print(menu.getCurrentItem());
+    drawer->print("\n");
     return ID;
   }
-  default:
+  if (current == draw_state::MENU) {
+    current = draw_state::DEFAULT;
     return ID;
   }
+  return ID;
 }
 
-state Draw::handleDefault(Joystick rawEvent) noexcept { return ID; }
 } // namespace MATSE::MCT

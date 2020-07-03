@@ -2,24 +2,57 @@
 
 namespace MATSE::MCT {
 
-state Gallery::handle(event e) noexcept {
-  switch (current) {
-  case gallery_state::DEFAULT:
-    return handleDefault(e);
-  case gallery_state::MENU:
-    return handleMenu(e);
+state Gallery::handle(joystick_left) noexcept {
+  if (current == gallery_state::DEFAULT) {
+    return ID;
   }
-};
+  if (current == gallery_state::MENU) {
+    return ID;
+  }
+  return ID;
+}
+state Gallery::handle(joystick_right) noexcept {
+  if (current == gallery_state::DEFAULT) {
+    return ID;
+  }
+  if (current == gallery_state::MENU) {
+    return ID;
+  }
+  return ID;
+}
 
-state Gallery::handleMenu(event e) noexcept {
-  switch (e) {
-  case event::JOYSTICK_UP:
+state Gallery::handle(joystick_up) noexcept {
+  if (current == gallery_state::DEFAULT) {
+    return ID;
+  }
+  if (current == gallery_state::MENU) {
     menu.up();
+    drawer->print(menu.getCurrentItem());
+    drawer->print("\n");
     return ID;
-  case event::JOYSTICK_DOWN:
+  }
+  return ID;
+}
+state Gallery::handle(joystick_down) noexcept {
+  if (current == gallery_state::DEFAULT) {
+    return ID;
+  }
+  if (current == gallery_state::MENU) {
     menu.down();
+    drawer->print(menu.getCurrentItem());
+    drawer->print("\n");
     return ID;
-  case event::A_BUTTON_UP: {
+  }
+  return ID;
+}
+state Gallery::handle(a_button_up) noexcept {
+  if (current == gallery_state::DEFAULT) {
+    current = gallery_state::MENU;
+    drawer->print(menu.getCurrentItem());
+    drawer->print("\n");
+    return ID;
+  }
+  if (current == gallery_state::MENU) {
     auto currentMenuItem = menu.getCurrent();
     switch (currentMenuItem) {
     case menu_items::BACK:
@@ -30,31 +63,20 @@ state Gallery::handleMenu(event e) noexcept {
     case menu_items::EDIT:
       return state::DRAW;
     default:
-      break;
+      return ID;
     }
-    menu.reset();
-    return ID;
   }
-  case event::B_BUTTON_UP: {
-    current = gallery_state::DEFAULT;
-    // revert to prev display state
-    return ID;
-  }
-  default:
-    return ID;
-  }
+  return ID;
 }
-
-state Gallery::handleDefault(event e) noexcept {
-  switch (e) {
-  case event::A_BUTTON_UP:
-    current = gallery_state::MENU;
-    return ID;
-  case event::B_BUTTON_UP:
+state Gallery::handle(b_button_up) noexcept {
+  if (current == gallery_state::DEFAULT) {
     return state::START;
-  default:
+  }
+  if (current == gallery_state::MENU) {
+    current = gallery_state::DEFAULT;
     return ID;
   }
+  return ID;
 }
 
 } // namespace MATSE::MCT

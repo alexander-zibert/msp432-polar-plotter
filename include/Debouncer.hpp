@@ -1,24 +1,14 @@
 #ifndef MATSE_MCT_DEBOUNCER_HPP
 #define MATSE_MCT_DEBOUNCER_HPP
 
+#include "Events.hpp"
 #include <etl/debounce.h>
 
 namespace MATSE::MCT {
-constexpr int VALID_COUNT_BUTTON = 50;
+constexpr int VALID_COUNT_BUTTON = 10;
 constexpr int REPEAT_COUNT_BUTTON = 500;
 constexpr int VALID_COUNT_JOYSTICK = 10;
 constexpr int REPEAT_COUNT_JOYSTICK = 500;
-
-struct ButtonA {
-  const bool pressed = true;
-};
-struct ButtonB {
-  const bool pressed = true;
-};
-struct Joystick {
-  const double x;
-  const double y;
-};
 
 template <int VALID_COUNT = VALID_COUNT_BUTTON,
           int REPEAT_COUNT = REPEAT_COUNT_BUTTON>
@@ -51,10 +41,11 @@ class JoystickDebouncer {
 
 public:
   void add(const Joystick &sample) noexcept {
-    debounceLeft.add(sample.x < -10);
-    debounceRight.add(sample.x > 10);
-    debounceUp.add(sample.y > 10);
-    debounceDown.add(sample.y < -10);
+    const auto middle = 512;
+    debounceLeft.add(sample.x < middle - 100);
+    debounceRight.add(sample.x > middle + 100);
+    debounceUp.add(sample.y > middle + 100);
+    debounceDown.add(sample.y < middle - 100);
   }
   void reset() noexcept {
     debounceLeft = etl::debounce<VALID_COUNT, 0, REPEAT_COUNT>{};

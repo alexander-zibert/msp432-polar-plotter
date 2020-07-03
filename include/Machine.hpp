@@ -1,36 +1,46 @@
 #ifndef MATSE_MCT_MACHINE_HPP
 #define MATSE_MCT_MACHINE_HPP
 
+#include <array>
+
+#include "DrawInterface.hpp"
+#include "Events.hpp"
 #include "Menu.hpp"
 
 namespace MATSE::MCT {
 
-struct Joystick {
-  double x;
-  double y;
-};
-
-enum class event {
-  A_BUTTON_UP,
-  A_BUTTON_DOWN,
-  B_BUTTON_UP,
-  B_BUTTON_DOWN,
-  JOYSTICK_LEFT,
-  JOYSTICK_RIGHT,
-  JOYSTICK_UP,
-  JOYSTICK_DOWN
-};
-
 enum class state { START, DRAW, GALLERY, PLOT };
 
-class Gallery {
+class State {
 public:
-  state handle(event e) noexcept;
+  virtual state getStateId() const noexcept = 0;
+  virtual state handle(a_button_up) noexcept { return getStateId(); };
+  virtual state handle(b_button_up) noexcept { return getStateId(); };
+  virtual state handle(joystick_left) noexcept { return getStateId(); };
+  virtual state handle(joystick_right) noexcept { return getStateId(); };
+  virtual state handle(joystick_up) noexcept { return getStateId(); };
+  virtual state handle(joystick_down) noexcept { return getStateId(); };
+  virtual state handle(Joystick) noexcept { return getStateId(); };
+  virtual void onEntry() noexcept {};
+  virtual void onExit() noexcept {};
+};
+
+class Gallery : public State {
+public:
+  Gallery(DrawInterface *drawer) : drawer{drawer} {}
+
+  state handle(joystick_up) noexcept override;
+  state handle(joystick_down) noexcept override;
+  state handle(joystick_left) noexcept override;
+  state handle(joystick_right) noexcept override;
+  state handle(a_button_up) noexcept override;
+  state handle(b_button_up) noexcept override;
+
+  state getStateId() const noexcept override { return ID; }
+  void onEntry() noexcept override { drawer->print("\ngallery.onEntry\n"); }
+  void onExit() noexcept override { drawer->print("\ngallery.onExit\n"); }
 
 private:
-  state handleMenu(event e) noexcept;
-  state handleDefault(event e) noexcept;
-
   static constexpr state ID{state::GALLERY};
 
   enum class gallery_state { DEFAULT, MENU };
@@ -39,18 +49,24 @@ private:
   enum class menu_items { BACK, PLOT, EDIT, NUM_ITEMS };
   Menu<menu_items, menu_items::BACK> menu{
       {"Back", "Plot selected", "Edit selected"}};
+
+  DrawInterface *drawer;
 };
 
-class Draw {
+class Draw : public State {
 public:
-  state handle(event e) noexcept;
-  state handle(Joystick rawEvent) noexcept;
+  Draw(DrawInterface *drawer) : drawer{drawer} {}
+
+  state handle(Joystick) noexcept override;
+  state handle(joystick_up) noexcept override;
+  state handle(joystick_down) noexcept override;
+  state handle(a_button_up) noexcept override;
+  state handle(b_button_up) noexcept override;
+  state getStateId() const noexcept override { return ID; }
+  void onEntry() noexcept override { drawer->print("\ndraw.onEntry\n"); }
+  void onExit() noexcept override { drawer->print("\ndraw.onExit\n"); }
 
 private:
-  state handleMenu(event e) noexcept;
-  state handleDefault(event e) noexcept;
-  state handleDefault(Joystick rawEvent) noexcept;
-
   static constexpr state ID{state::DRAW};
   enum class draw_state { DEFAULT, MENU };
   draw_state current{draw_state::DEFAULT};
@@ -63,11 +79,24 @@ private:
   bool isPressed = false;
   double x = 0.0;
   double y = 0.0;
+  DrawInterface *drawer;
 };
 
-class Start {
+class Start : public State {
 public:
-  state handle(event e) noexcept;
+  Start(DrawInterface *drawer);
+
+  state handle(joystick_up) noexcept override;
+  state handle(joystick_down) noexcept override;
+  state handle(a_button_up) noexcept override;
+
+  state getStateId() const noexcept override { return ID; }
+  void onEntry() noexcept override {
+    drawer->print("\nstart.onEntry\n");
+    drawer->print(menu.getCurrentItem());
+    drawer->print("\n");
+  }
+  void onExit() noexcept override { drawer->print("\nstart.onExit\n"); }
 
 private:
   void cleanup() noexcept;
@@ -75,29 +104,55 @@ private:
   enum class menu_items { DRAW, PLOT, NUM_ITEMS };
   Menu<menu_items, menu_items::DRAW> menu{
       {"Create new drawing", "Plot existing drawing"}};
+
+  DrawInterface *drawer;
 };
 
-class Plot {
+class Plot : public State {
 public:
-  state handle(event e) noexcept;
+  Plot(DrawInterface *drawer) : drawer{drawer} {}
+  state handle(a_button_up) noexcept override;
+  state handle(b_button_up) noexcept override;
+  state getStateId() const noexcept override { return ID; }
+  void onEntry() noexcept override { drawer->print("\nplot.onEntry\n"); }
+  void onExit() noexcept override { drawer->print("\nplot.onExit\n"); }
 
 private:
   static constexpr state ID{state::PLOT};
   bool isPaused = true;
+  DrawInterface *drawer;
 };
 
 class Machine {
 public:
-  state handle(event e) noexcept;
-  state handle(Joystick rawEvent) noexcept;
+  Machine(DrawInterface *drawer)
+      : drawer{drawer}, states{new Start{drawer}, new Draw{drawer},
+                               new Gallery{drawer}, new Plot{drawer}} {
+    states[static_cast<int>(currentState)]->onEntry();
+  }
+  // Machine(DrawInterface *drawer);
+
+  Machine(const Machine &) = delete;
+  Machine &operator=(const Machine &) = delete;
+  ~Machine() = default;
+  Machine(const Machine &&) = delete;
+  Machine &operator=(const Machine &&) = delete;
+
+  state handle(auto e) noexcept {
+    auto newState = states[static_cast<int>(currentState)]->handle(e);
+    if (newState != currentState) {
+      states[static_cast<int>(currentState)]->onExit();
+      currentState = newState;
+      states[static_cast<int>(currentState)]->onEntry();
+    }
+    return currentState;
+  }
   [[nodiscard]] state getCurrentState() const noexcept;
 
 private:
+  DrawInterface *drawer;
   state currentState = state::START;
-  Draw draw{};
-  Gallery gallery{};
-  Start start{};
-  Plot plot{};
+  std::array<State *, 4> states;
 };
 
 } // namespace MATSE::MCT

@@ -32,6 +32,9 @@ public:
   void reset() noexcept { current = START_INDEX; }
   [[nodiscard]] EnumClass getCurrent() const noexcept { return current; }
   [[nodiscard]] auto getItems() const noexcept { return items; }
+  [[nodiscard]] auto getCurrentItem() const noexcept {
+    return items[static_cast<int>(current)];
+  }
 
 private:
   static constexpr int NUM_ITEMS = static_cast<int>(EnumClass::NUM_ITEMS);
@@ -39,6 +42,6 @@ private:
   EnumClass current;
 };
 
-}; // namespace MATSE::MCT
+} // namespace MATSE::MCT
 
 #endif

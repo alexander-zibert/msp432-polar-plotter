@@ -3,6 +3,8 @@ PLATFORM  = msp432
 YAHAL_DIR = vendor/YAHAL
 DSLITE=~/ti/ccs1000/ccs/ccs_base/DebugServer/bin/DSLite
 
+VERBOSE=true
+
 # name of final target
 TARGET = main.out
 
@@ -18,13 +20,16 @@ INC_DIRS += $(YAHAL_DIR)/src/platform/$(PLATFORM)
 INC_DIRS += $(YAHAL_DIR)/include/interface
 INC_DIRS += $(YAHAL_DIR)/src/driver
 INC_DIRS += $(YAHAL_DIR)/src/util
+INC_DIRS += $(YAHAL_DIR)/src/uGUI
+INC_DIRS += $(YAHAL_DIR)/src/uGUI/fonts
 INC_DIRS += vendor
 INC_DIRS += include
 
 # linked in libraries
 LINK_LIBS = $(YAHAL_DIR)/libYAHAL_msp432.a
 
-FLAGS_CXX = -Wall -Wextra -pedantic -pedantic-errors -fno-threadsafe-statics -fno-exceptions -std=c++2a
+FLAGS_CXX = -Wall -Wextra -pedantic -fno-threadsafe-statics -fno-exceptions -std=c++2a
+#  -pedantic-errors
 # FLAGS_CXX = -Wall -Wextra -fno-threadsafe-statics -fno-exceptions -std=c++14
 
 

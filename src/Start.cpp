@@ -1,30 +1,31 @@
 #include "Machine.hpp"
 
 namespace MATSE::MCT {
-state Start::handle(event e) noexcept {
-  switch (e) {
-  case event::JOYSTICK_UP:
-    menu.up();
-    break;
-  case event::JOYSTICK_DOWN:
-    menu.down();
-    break;
-  case event::A_BUTTON_UP: {
-    auto currentMenuItem = menu.getCurrent();
-    cleanup();
-    if (currentMenuItem == menu_items::DRAW) {
-      return state::DRAW;
-    }
-    if (currentMenuItem == menu_items::PLOT) {
-      return state::GALLERY;
-    }
-    break;
+Start::Start(DrawInterface *drawer) : drawer{drawer} {}
+
+state Start::handle(joystick_up) noexcept {
+  menu.up();
+  drawer->print(menu.getCurrentItem());
+  drawer->print("\n");
+  return ID;
+}
+
+state Start::handle(joystick_down) noexcept {
+  menu.down();
+  drawer->print(menu.getCurrentItem());
+  drawer->print("\n");
+  return ID;
+}
+
+state Start::handle(a_button_up) noexcept {
+  auto currentMenuItem = menu.getCurrent();
+  if (currentMenuItem == menu_items::DRAW) {
+    return state::DRAW;
   }
-  default:
-    break;
+  if (currentMenuItem == menu_items::PLOT) {
+    return state::GALLERY;
   }
   return ID;
-};
-
+}
 void Start::cleanup() noexcept { menu.reset(); }
 } // namespace MATSE::MCT

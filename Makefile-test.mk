@@ -9,7 +9,7 @@ TEST_FILE=run_test.out
 
 INCLUDES=-I$(TEST_DIR) -I$(LIB_DIR) -I$(VENDOR_DIR)
 
-SRCS=$(wildcard $(TEST_DIR)/*.cpp src/*.cpp)
+SRCS=$(wildcard $(TEST_DIR)/*.cpp src/Start.cpp src/Draw.cpp src/Gallery.cpp src/Plot.cpp src/Machine.cpp)
 
 OBJS=$(SRCS:.cpp=.o)
  
