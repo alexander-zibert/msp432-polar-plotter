@@ -28,7 +28,7 @@ INC_DIRS += include
 # linked in libraries
 LINK_LIBS = $(YAHAL_DIR)/libYAHAL_msp432.a
 
-FLAGS_CXX = -Wall -Wextra -pedantic -fno-threadsafe-statics -fno-exceptions -std=c++2a
+FLAGS_CXX = -Wall -Wextra -pedantic -fno-threadsafe-statics -fno-exceptions -fno-rtti -std=c++2a
 #  -pedantic-errors
 # FLAGS_CXX = -Wall -Wextra -fno-threadsafe-statics -fno-exceptions -std=c++14
 
@@ -51,7 +51,7 @@ FLAGS_F		   += -fno-strict-aliasing
 FLAGS_M        += -mcpu=cortex-m4 -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mabi=aapcs
 FLAGS_DEBUG    += #-g -gdwarf-3 -gstrict-dwarf
 FLAGS_WARN     += -Wall -Wextra
-FLAGS_OPT      += -O2 -s
+FLAGS_OPT      += -Os -s
 
 FLAGS_C         =
 FLAGS_ASM       =

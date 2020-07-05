@@ -126,8 +126,13 @@ private:
 class Machine {
 public:
   Machine(DrawInterface *drawer)
-      : drawer{drawer}, states{new Start{drawer}, new Draw{drawer},
-                               new Gallery{drawer}, new Plot{drawer}} {
+      : drawer{drawer}, start{Start{drawer}}, draw{Draw{drawer}},
+        gallery{Gallery{drawer}}, plot{Plot{drawer}} {
+    // not using new saves 30kB!
+    states[0] = &start;
+    states[1] = &draw;
+    states[2] = &gallery;
+    states[3] = &plot;
     states[static_cast<int>(currentState)]->onEntry();
   }
   // Machine(DrawInterface *drawer);
@@ -148,11 +153,16 @@ public:
     return currentState;
   }
   [[nodiscard]] state getCurrentState() const noexcept;
+  DrawInterface &getDrawer() const noexcept { return *drawer; }
 
 private:
   DrawInterface *drawer;
   state currentState = state::START;
-  std::array<State *, 4> states;
+  std::array<State *, 4> states{};
+  Start start;
+  Draw draw;
+  Gallery gallery;
+  Plot plot;
 };
 
 } // namespace MATSE::MCT
