@@ -8,7 +8,7 @@ namespace MATSE::MCT {
 constexpr int VALID_COUNT_BUTTON = 10;
 constexpr int REPEAT_COUNT_BUTTON = 500;
 constexpr int VALID_COUNT_JOYSTICK = 10;
-constexpr int REPEAT_COUNT_JOYSTICK = 500;
+constexpr int REPEAT_COUNT_JOYSTICK = 10;
 
 template <int VALID_COUNT = VALID_COUNT_BUTTON,
           int REPEAT_COUNT = REPEAT_COUNT_BUTTON>
@@ -33,6 +33,26 @@ private:
   etl::debounce<VALID_COUNT, 0, REPEAT_COUNT> debouncer{};
 };
 
+struct JoystickSample {
+  bool left;
+  bool right;
+  bool up;
+  bool down;
+
+  bool operator==(const JoystickSample &sample2) const noexcept {
+    return left == sample2.left && right == sample2.right && up == sample2.up &&
+           down == sample2.down;
+  }
+
+  bool operator!=(const JoystickSample &sample2) const noexcept {
+    return !((*this) == sample2);
+  }
+
+  bool isNoop() const noexcept {
+    return (*this) == JoystickSample{false, false, false, false};
+  }
+};
+
 template <int VALID_COUNT = VALID_COUNT_JOYSTICK,
           int REPEAT_COUNT = REPEAT_COUNT_JOYSTICK>
 class JoystickDebouncer {
@@ -40,18 +60,17 @@ class JoystickDebouncer {
   static_assert(REPEAT_COUNT >= 0);
 
 public:
-  void add(const Joystick &sample) noexcept {
-    const auto middle = 512;
-    debounceLeft.add(sample.x < middle - 100);
-    debounceRight.add(sample.x > middle + 100);
-    debounceUp.add(sample.y > middle + 100);
-    debounceDown.add(sample.y < middle - 100);
+  void add(const JoystickSample &sample) noexcept {
+    debounceLeft.add(sample.left);
+    debounceRight.add(sample.right);
+    debounceUp.add(sample.up);
+    debounceDown.add(sample.down);
   }
   void reset() noexcept {
-    debounceLeft = etl::debounce<VALID_COUNT, 0, REPEAT_COUNT>{};
-    debounceRight = etl::debounce<VALID_COUNT, 0, REPEAT_COUNT>{};
-    debounceUp = etl::debounce<VALID_COUNT, 0, REPEAT_COUNT>{};
-    debounceDown = etl::debounce<VALID_COUNT, 0, REPEAT_COUNT>{};
+    debounceLeft = etl::debounce<VALID_COUNT, REPEAT_COUNT, REPEAT_COUNT>{};
+    debounceRight = etl::debounce<VALID_COUNT, REPEAT_COUNT, REPEAT_COUNT>{};
+    debounceUp = etl::debounce<VALID_COUNT, REPEAT_COUNT, REPEAT_COUNT>{};
+    debounceDown = etl::debounce<VALID_COUNT, REPEAT_COUNT, REPEAT_COUNT>{};
   }
   [[nodiscard]] bool isLeftPress() const noexcept {
     return debounceLeft.has_changed() && debounceLeft.is_set();
@@ -79,10 +98,10 @@ public:
   }
 
 private:
-  etl::debounce<VALID_COUNT, 0, REPEAT_COUNT> debounceLeft{};
-  etl::debounce<VALID_COUNT, 0, REPEAT_COUNT> debounceRight{};
-  etl::debounce<VALID_COUNT, 0, REPEAT_COUNT> debounceUp{};
-  etl::debounce<VALID_COUNT, 0, REPEAT_COUNT> debounceDown{};
+  etl::debounce<VALID_COUNT, REPEAT_COUNT, REPEAT_COUNT> debounceLeft{};
+  etl::debounce<VALID_COUNT, REPEAT_COUNT, REPEAT_COUNT> debounceRight{};
+  etl::debounce<VALID_COUNT, REPEAT_COUNT, REPEAT_COUNT> debounceUp{};
+  etl::debounce<VALID_COUNT, REPEAT_COUNT, REPEAT_COUNT> debounceDown{};
 };
 } // namespace MATSE::MCT
 

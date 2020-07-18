@@ -139,7 +139,7 @@ public:
 
   const double L = 527 - 29;
   const int steps_per_revolution = 200;
-  const int microstep_factor = 16;
+  const int microstep_factor = 1;
   const double revolution_length = 50;
   const double step_length =
       revolution_length / (steps_per_revolution * microstep_factor);

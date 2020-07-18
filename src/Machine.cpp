@@ -2,8 +2,8 @@
 
 namespace MATSE::MCT {
 
-[[nodiscard]] state Machine::getCurrentState() const noexcept {
-  return currentState;
-}
+Machine::Machine() : super_t{Start{this}} {}
+
+void Machine::start() noexcept { entry(); }
 
 } // namespace MATSE::MCT

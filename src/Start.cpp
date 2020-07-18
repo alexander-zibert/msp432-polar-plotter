@@ -1,31 +1,28 @@
 #include "Machine.hpp"
 
 namespace MATSE::MCT {
-Start::Start(DrawInterface *drawer) : drawer{drawer} {}
 
-state Start::handle(joystick_up) noexcept {
+void Start::entry() noexcept {
+  base->drawer.print("start.entry\n");
+  base->drawer.printMenu(menu);
+}
+void Start::exit() noexcept { base->drawer.print("start.exit\n"); }
+
+void Start::on(a_button_up) noexcept {
+  if (menu.getCurrent() == menu_state::DRAW) {
+    base->transition(Draw{base});
+  }
+  if (menu.getCurrent() == menu_state::GALLERY) {
+    base->transition(Draw{base});
+  }
+}
+void Start::on(joystick_up) noexcept {
   menu.up();
-  drawer->print(menu.getCurrentItem());
-  drawer->print("\n");
-  return ID;
+  base->drawer.print(menu);
 }
-
-state Start::handle(joystick_down) noexcept {
+void Start::on(joystick_down) noexcept {
   menu.down();
-  drawer->print(menu.getCurrentItem());
-  drawer->print("\n");
-  return ID;
+  base->drawer.print(menu);
 }
 
-state Start::handle(a_button_up) noexcept {
-  auto currentMenuItem = menu.getCurrent();
-  if (currentMenuItem == menu_items::DRAW) {
-    return state::DRAW;
-  }
-  if (currentMenuItem == menu_items::PLOT) {
-    return state::GALLERY;
-  }
-  return ID;
-}
-void Start::cleanup() noexcept { menu.reset(); }
 } // namespace MATSE::MCT

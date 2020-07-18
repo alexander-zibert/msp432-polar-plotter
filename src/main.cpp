@@ -39,8 +39,6 @@ bool buttonIsPressed() { return !s1.gpioRead(); }
 
 bool button2IsPressed() { return !s2.gpioRead(); }
 
-volatile MATSE::MCT::state currentState{MATSE::MCT::state::START};
-
 MATSE::MCT::Model model{};
 
 char textBuffer[200];
@@ -58,26 +56,36 @@ void callback(void *arg) {
   b_debouncer.add(MATSE::MCT::ButtonB{button2IsPressed()});
   auto x = joy_X.adcReadRaw();
   auto y = joy_Y.adcReadRaw();
-  joystick_debouncer.add({x, y});
+  const auto middle = 512;
+  const auto margin = 100;
+  const MATSE::MCT::JoystickSample joystickSample{.left{x < middle - margin},
+                                                  .right{x > middle + margin},
+                                                  .up{y > middle + margin},
+                                                  .down{y < middle - margin}};
+
+  joystick_debouncer.add(joystickSample);
   if (a_debouncer.isKeyUp()) {
-    m->handle(MATSE::MCT::a_button_up{});
+    m->on(MATSE::MCT::a_button_up{});
   }
   if (b_debouncer.isKeyUp()) {
-    m->handle(MATSE::MCT::b_button_up{});
+    m->on(MATSE::MCT::b_button_up{});
   }
   if (joystick_debouncer.isDownPress()) {
-    m->handle(MATSE::MCT::joystick_down{});
+    m->on(MATSE::MCT::joystick_down{});
   }
   if (joystick_debouncer.isUpPress()) {
-    m->handle(MATSE::MCT::joystick_up{});
+    m->on(MATSE::MCT::joystick_up{});
   }
   if (joystick_debouncer.isLeftPress()) {
-    m->handle(MATSE::MCT::joystick_left{});
+    m->on(MATSE::MCT::joystick_left{});
   }
   if (joystick_debouncer.isRightPress()) {
-    m->handle(MATSE::MCT::joystick_right{});
+    m->on(MATSE::MCT::joystick_right{});
   }
-  currentState = m->getCurrentState();
+  if (i % 5 == 0) {
+    m->on(joystickSample);
+  }
+
   stepPin1.gpioWrite(model.getMotor1Step());
   stepPin2.gpioWrite(model.getMotor2Step());
   dirPin1.gpioWrite(model.getMotor1Dir());
@@ -85,17 +93,6 @@ void callback(void *arg) {
   model.timeStep();
   i += 1;
 }
-
-class uGUIDrawer : public MATSE::MCT::DrawInterface {
-public:
-  uGUIDrawer(uGUI *gui) : gui{gui} {}
-  void print(const char *s) override {
-    gui->ConsolePutString(const_cast<char *>(s));
-  }
-
-private:
-  uGUI *gui;
-};
 
 int main() {
   s1.gpioMode(GPIO::INPUT | GPIO::PULLUP);
@@ -130,12 +127,30 @@ int main() {
   gui.ConsoleSetArea(0, 0, 127, 127);
   gui.ConsoleSetBackcolor(C_BLACK);
   gui.ConsoleSetForecolor(C_WHITE);
-  auto drawer = uGUIDrawer{&gui};
+  MATSE::MCT::uGUIDrawer::gui = &gui;
+  MATSE::MCT::uGUIDrawer::lcd = &lcd;
 
   joy_Y.adcMode(ADC::ADC_10_BIT);
   joy_X.adcMode(ADC::ADC_10_BIT);
 
-  MATSE::MCT::Machine machine{&drawer};
+  MATSE::MCT::Machine machine{};
+  machine.start();
+
+  // MATSE::MCT::Buffer buffer{};
+  // for (int i = 0; i < 128 * 128; i += 1) {
+  //   if (i % 5 == 0) {
+  //     buffer[i] = true;
+  //   }
+  // }
+  // machine.drawer.print(buffer, C_HOT_PINK, C_INDIGO);
+  // textBuffer[10] = 0;
+  // const int start = 17;
+  // for (int i = start; i < 100; i += 1) {
+  //   textBuffer[(i - start) % 10] = i;
+  //   if ((i - start) % 10 == 0) {
+  //     machine.drawer.print(textBuffer);
+  //   }
+  // }
   timer_msp432 timer;
   timer.setPeriod(10 * 1000, TIMER::PERIODIC);
   timer.setCallback(callback, &machine);
