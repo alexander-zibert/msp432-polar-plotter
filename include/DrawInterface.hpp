@@ -46,6 +46,11 @@ private:
 class uGUIDrawer {
 public:
   void print(const char *s) {
+    gui->ConsolePutString(const_cast<char *>(s));
+    return;
+  }
+
+  void printDebug(const char *s) {
     // gui->ConsolePutString(const_cast<char *>(s));
     return;
   }

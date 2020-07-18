@@ -20,9 +20,9 @@ template <typename StateVariant> struct CompositeState {
   template <typename Event> void on(Event e) noexcept {
     std::visit(
         [&](auto &state) {
-          _drawer.print("State ");
-          _drawer.print(state.name);
-          _drawer.print(" is handling the event.\n");
+          _drawer.printDebug("State ");
+          _drawer.printDebug(state.name);
+          _drawer.printDebug(" is handling the event.\n");
           state.on(e);
         },
         currentState);
@@ -35,8 +35,8 @@ template <typename StateVariant> struct CompositeState {
     if (!std::holds_alternative<S>(currentState)) {
       this->exitSubState();
       currentState = s;
-      _drawer.print(s.name);
-      _drawer.print("\n");
+      _drawer.printDebug(s.name);
+      _drawer.printDebug("\n");
       this->enterSubState();
     }
   }

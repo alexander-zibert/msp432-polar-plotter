@@ -4,10 +4,10 @@
 namespace MATSE::MCT {
 
 void DrawMenu::entry() noexcept {
-  base->drawer.print("menu.entry");
+  base->drawer.printDebug("menu.entry");
   base->drawer.printMenu(menu);
 }
-void DrawMenu::exit() noexcept { base->drawer.print("menu.exit"); }
+void DrawMenu::exit() noexcept { base->drawer.printDebug("menu.exit"); }
 
 void DrawMenu::on(a_button_up) noexcept {
   if (menu.getCurrent() == menu_state::BACK) {
@@ -23,12 +23,10 @@ void DrawMenu::on(a_button_up) noexcept {
 }
 void DrawMenu::on(b_button_up) noexcept { base->transition(DrawDefault{base}); }
 void DrawMenu::on(joystick_up) noexcept {
-  base->drawer.print("up");
   menu.up();
   base->drawer.print(menu);
 }
 void DrawMenu::on(joystick_down) noexcept {
-  base->drawer.print("down");
   menu.down();
   base->drawer.print(menu);
 }

@@ -12,12 +12,12 @@ template <typename T> constexpr int8_t sign(T t) noexcept {
 }
 
 void DrawDefault::entry() noexcept {
-  base->drawer.print("default.entry");
+  base->drawer.printDebug("default.entry");
   base->drawer.print(DrawData::buffer, C_BLACK, C_WHITE);
   base->drawer.print(DrawData::cursor);
   base->drawer.printDrawProgress(0);
 }
-void DrawDefault::exit() noexcept { base->drawer.print("default.exit"); }
+void DrawDefault::exit() noexcept { base->drawer.printDebug("default.exit"); }
 
 void DrawDefault::on(a_button_up) noexcept {
   DrawData::pressed = !DrawData::pressed;

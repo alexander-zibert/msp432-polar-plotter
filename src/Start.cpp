@@ -3,10 +3,10 @@
 namespace MATSE::MCT {
 
 void Start::entry() noexcept {
-  base->drawer.print("start.entry\n");
+  base->drawer.printDebug("start.entry\n");
   base->drawer.printMenu(menu);
 }
-void Start::exit() noexcept { base->drawer.print("start.exit\n"); }
+void Start::exit() noexcept { base->drawer.printDebug("start.exit\n"); }
 
 void Start::on(a_button_up) noexcept {
   if (menu.getCurrent() == menu_state::DRAW) {
