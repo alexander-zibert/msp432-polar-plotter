@@ -41,7 +41,7 @@ public:
     to_go_2 = static_cast<int>(std::floor(std::abs(steps_l2)) * 2);
     dir_1 = steps_l1 >= 0 ? true : false;
     dir_2 = steps_l2 >= 0 ? true : false;
-    printf("length: %f, numIntervals: %f\n", length, numIntervals);
+    // printf("length: %f, numIntervals: %f\n", length, numIntervals);
   }
 
   bool hasReachedTarget() const noexcept {

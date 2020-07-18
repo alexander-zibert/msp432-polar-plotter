@@ -8,6 +8,7 @@
 #include "DrawInterface.hpp"
 #include "Events.hpp"
 #include "Menu.hpp"
+#include "Model.hpp"
 
 namespace MATSE::MCT {
 
@@ -157,12 +158,61 @@ struct Start : public LeafState {
   static constexpr const char *name = "Start";
 };
 
-using State = std::variant<Start, Draw>;
+struct PlotPlotting : public LeafState {
+  Machine *base;
+  Point lastModelPoint;
+
+  PlotPlotting(Machine *base) : base{base} {}
+
+  template <typename Event> void on(Event) {}
+
+  void on(a_button_up) noexcept;
+  // void on(b_button_up) noexcept;
+  void on(timestep) noexcept;
+
+  void entry() noexcept;
+  void exit() noexcept;
+
+  static constexpr const char *name = "PlotPlotting";
+};
+
+struct PlotPaused : public LeafState {
+  Machine *base;
+
+  PlotPaused(Machine *base) : base{base} {}
+
+  template <typename Event> void on(Event) {}
+
+  void on(a_button_up) noexcept;
+  void on(b_button_up) noexcept;
+
+  void entry() noexcept;
+  void exit() noexcept;
+
+  static constexpr const char *name = "PlotPaused";
+};
+
+using PlotState = std::variant<PlotPaused, PlotPlotting>;
+
+struct Plot : public CompositeState<PlotState> {
+  using super_t = CompositeState<PlotState>;
+  Machine *base;
+
+  Plot(Machine *base);
+
+  void enterCompositeState() noexcept override;
+  void exitCompositeState() noexcept override;
+
+  static constexpr const char *name = "Plot";
+};
+
+using State = std::variant<Start, Draw, Plot>;
 struct Machine : public CompositeState<State> {
   using super_t = CompositeState<State>;
-  Machine();
+  Machine(Model *model);
   void start() noexcept;
 
+  Model *model;
   uGUIDrawer drawer{};
 
   static constexpr const char *name = "Machine";

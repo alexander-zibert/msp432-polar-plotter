@@ -20,6 +20,17 @@ void DrawMenu::on(a_button_up) noexcept {
   if (menu.getCurrent() == menu_state::EXIT) {
     base->transition(Start{base});
   }
+  if (menu.getCurrent() == menu_state::PLOT) {
+    // add last point
+    if (DrawData::pressed) {
+      DrawData::plotData.addPoint(
+          {DrawData::cursor.x, DrawData::cursor.y, true});
+    }
+
+    PlotData::plotData = DrawData::plotData;
+    PlotData::buffer = DrawData::buffer;
+    base->transition(Plot{base});
+  }
 }
 void DrawMenu::on(b_button_up) noexcept { base->transition(DrawDefault{base}); }
 void DrawMenu::on(joystick_up) noexcept {

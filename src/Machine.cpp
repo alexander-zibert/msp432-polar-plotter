@@ -2,7 +2,7 @@
 
 namespace MATSE::MCT {
 
-Machine::Machine() : super_t{Start{this}} {}
+Machine::Machine(Model *model) : super_t{Start{this}}, model{model} {}
 
 void Machine::start() noexcept { entry(); }
 

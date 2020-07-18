@@ -13,6 +13,7 @@
 #include "uGUI_colors.h"
 
 // project includes
+#include "Data.hpp"
 #include "Debouncer.hpp"
 #include "DrawInterface.hpp"
 #include "Machine.hpp"
@@ -25,6 +26,9 @@ gpio_msp432_pin dirPin1(PORT_PIN(6, 1));
 gpio_msp432_pin stepPin1(PORT_PIN(4, 0));
 gpio_msp432_pin dirPin2(PORT_PIN(4, 5));
 gpio_msp432_pin stepPin2(PORT_PIN(4, 7));
+
+gpio_msp432_pin red_led(PORT_PIN(1, 0));
+gpio_msp432_pin blue_led(PORT_PIN(2, 2));
 
 gpio_msp432_pin servo(PORT_PIN(2, 5));
 
@@ -85,13 +89,26 @@ void callback(void *arg) {
   if (i % 5 == 0) {
     m->on(joystickSample);
   }
+  m->on(MATSE::MCT::timestep{});
 
-  stepPin1.gpioWrite(model.getMotor1Step());
-  stepPin2.gpioWrite(model.getMotor2Step());
-  dirPin1.gpioWrite(model.getMotor1Dir());
-  dirPin2.gpioWrite(model.getMotor2Dir());
-  model.timeStep();
+  // stepPin1.gpioWrite(model.getMotor1Step());
+  // stepPin2.gpioWrite(model.getMotor2Step());
+  // dirPin1.gpioWrite(model.getMotor1Dir());
+  // dirPin2.gpioWrite(model.getMotor2Dir());
+  // model.timeStep();
   i += 1;
+}
+
+void modelCallback(void *) {
+  if (MATSE::MCT::PlotData::isPlotting) {
+    // stepPin1.gpioWrite(model.getMotor1Step());
+    // stepPin2.gpioWrite(model.getMotor2Step());
+    red_led.gpioWrite(model.getMotor1Step());
+    blue_led.gpioWrite(model.getMotor2Step());
+    dirPin1.gpioWrite(model.getMotor1Dir());
+    dirPin2.gpioWrite(model.getMotor2Dir());
+    model.timeStep();
+  }
 }
 
 int main() {
@@ -106,6 +123,9 @@ int main() {
   stepPin1.gpioMode(GPIO::OUTPUT);
   dirPin2.gpioMode(GPIO::OUTPUT);
   stepPin2.gpioMode(GPIO::OUTPUT);
+
+  red_led.gpioMode(GPIO::OUTPUT);
+  blue_led.gpioMode(GPIO::OUTPUT);
 
   dirPin1.gpioWrite(HIGH);
   dirPin2.gpioWrite(HIGH);
@@ -133,7 +153,7 @@ int main() {
   joy_Y.adcMode(ADC::ADC_10_BIT);
   joy_X.adcMode(ADC::ADC_10_BIT);
 
-  MATSE::MCT::Machine machine{};
+  MATSE::MCT::Machine machine{&model};
   machine.start();
 
   // MATSE::MCT::Buffer buffer{};
@@ -155,13 +175,12 @@ int main() {
   timer.setPeriod(10 * 1000, TIMER::PERIODIC);
   timer.setCallback(callback, &machine);
 
-  // timer_msp432 timer2(TIMER32_2);
-  // timer2.setPeriod(500, TIMER::PERIODIC);
-  // timer2.setCallback(callback2, &model);
+  timer_msp432 timer2(TIMER32_2);
+  timer2.setPeriod(5000, TIMER::PERIODIC);
+  timer2.setCallback(modelCallback, nullptr);
 
   timer.start();
-  // timer2.start();
-  model.move(400, 250);
+  timer2.start();
   while (true) {
   }
   return 0;

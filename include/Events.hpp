@@ -18,6 +18,7 @@ struct joystick_left {};
 struct joystick_right {};
 struct joystick_up {};
 struct joystick_down {};
+struct timestep {};
 
 } // namespace MATSE::MCT
 

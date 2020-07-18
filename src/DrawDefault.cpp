@@ -20,7 +20,14 @@ void DrawDefault::entry() noexcept {
 void DrawDefault::exit() noexcept { base->drawer.printDebug("default.exit"); }
 
 void DrawDefault::on(a_button_up) noexcept {
-  DrawData::pressed = !DrawData::pressed;
+  if (DrawData::pressed) {
+    DrawData::pressed = false;
+    DrawData::plotData.addPoint(
+        {DrawData::cursor.x, DrawData::cursor.y, false});
+  } else {
+    DrawData::pressed = true;
+    DrawData::plotData.addPoint({DrawData::cursor.x, DrawData::cursor.y, true});
+  }
 }
 void DrawDefault::on(b_button_up) noexcept { base->transition(DrawMenu{base}); }
 void DrawDefault::on(JoystickSample e) noexcept {

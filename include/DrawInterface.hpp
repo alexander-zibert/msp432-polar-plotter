@@ -1,25 +1,16 @@
 #ifndef MATSE_MCT_DRAW_INTERFACE_HPP
 #define MATSE_MCT_DRAW_INTERFACE_HPP
 
-#include <bitset>
-
 #include "uGUI.h"
 #include "uGUI_colors.h"
 
 #include "lcd_interface.h"
 
+#include "Data.hpp"
 #include "Menu.hpp"
+#include "Model.hpp"
 
 namespace MATSE::MCT {
-
-struct Point {
-  uint8_t x;
-  uint8_t y;
-
-  bool operator==(const Point &p2) { return x == p2.x && y == p2.y; }
-};
-
-using Buffer = std::bitset<128 * 128>;
 
 class bitset_stream : public pixel_stream {
 public:
@@ -93,7 +84,37 @@ public:
     }
   }
 
+  void printPlotProgress(int number, int number2) {
+    snprintf(textBuffer, sizeof(textBuffer), "%d/%d", number, number2);
+    gui->PutString(50, 120, textBuffer);
+  }
+
+  void debugPlot(TracePoint from, TracePoint to) {
+    if (from.pressed) {
+      snprintf(textBuffer, sizeof(textBuffer), "[x] (%d,%d)->(%d,%d)\n", from.x,
+               from.y, to.x, to.y);
+    } else {
+      snprintf(textBuffer, sizeof(textBuffer), "[o] (%d,%d)->(%d,%d)\n", from.x,
+               from.y, to.x, to.y);
+    }
+    gui->ConsolePutString(textBuffer);
+  }
+
+  void debugModel(const Model &model) {
+    snprintf(textBuffer, sizeof(textBuffer), "(%.1f, %.1f)\n", model.targetX,
+             model.targetY);
+    gui->ConsolePutString(textBuffer);
+  }
+
+  void debugTransform(uint8_t x1, uint8_t y1, double x2, double y2) {
+    snprintf(textBuffer, sizeof(textBuffer), "(%d,%d)->(%.0f,%.0f)\n", x1, y1,
+             x2, y2);
+    gui->ConsolePutString(textBuffer);
+  }
+
   void print(Point p, UG_COLOR c = C_BLACK) { gui->DrawPixel(p.x, p.y, c); }
+
+  void clear(UG_COLOR c = C_BLACK) { gui->FillScreen(c); }
 
   static inline uGUI *gui = nullptr;
   static inline lcd_interface *lcd = nullptr;

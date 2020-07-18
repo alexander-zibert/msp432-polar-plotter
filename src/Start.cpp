@@ -4,6 +4,7 @@ namespace MATSE::MCT {
 
 void Start::entry() noexcept {
   base->drawer.printDebug("start.entry\n");
+  base->drawer.clear(C_BLACK);
   base->drawer.printMenu(menu);
 }
 void Start::exit() noexcept { base->drawer.printDebug("start.exit\n"); }
