@@ -84,15 +84,15 @@ public:
   }
 
   void printDrawProgress(int number) {
-    if (number % 100 == 0) {
-      snprintf(textBuffer, sizeof(textBuffer), "%d%%",
-               (int)((double)number / 1000. * 100));
-      gui->PutString(50, 120, textBuffer);
-    }
+    snprintf(textBuffer, sizeof(textBuffer), "%d%%",
+             (int)((double)number / 1000. * 100));
+    gui->PutString(50, 120, textBuffer);
   }
 
   void printPlotProgress(int number, int number2) {
     snprintf(textBuffer, sizeof(textBuffer), "%d/%d", number, number2);
+    gui->SetForecolor(C_BLACK);
+    gui->SetBackcolor(C_WHITE);
     gui->PutString(50, 120, textBuffer);
   }
 

@@ -48,21 +48,17 @@ MATSE::MCT::Model model{};
 
 char textBuffer[200];
 int i{};
+int callback2_i{};
 
 void callback(void *arg) {
 
   auto m = static_cast<MATSE::MCT::Machine *>(arg);
-  // if (i == 0 || i == 60000 / 2) {
-  //   snprintf(textBuffer, sizeof(textBuffer), "i: %d, x: %f, y: %f\n", i,
-  //            model.getCurrentX(), model.getCurrentY());
-  //   m->getDrawer().print(textBuffer);
-  // }
   a_debouncer.add(MATSE::MCT::ButtonA{buttonIsPressed()});
   b_debouncer.add(MATSE::MCT::ButtonB{button2IsPressed()});
   auto x = joy_X.adcReadRaw();
   auto y = joy_Y.adcReadRaw();
   const auto middle = 512;
-  const auto margin = 100;
+  const auto margin = 200;
   const MATSE::MCT::JoystickSample joystickSample{.left{x < middle - margin},
                                                   .right{x > middle + margin},
                                                   .up{y > middle + margin},
@@ -87,29 +83,42 @@ void callback(void *arg) {
   if (joystick_debouncer.isRightPress()) {
     m->on(MATSE::MCT::joystick_right{});
   }
-  if (i % 5 == 0) {
+  if (i % 1 == 0) {
     m->on(joystickSample);
   }
   m->on(MATSE::MCT::timestep{});
-
-  // stepPin1.gpioWrite(model.getMotor1Step());
-  // stepPin2.gpioWrite(model.getMotor2Step());
-  // dirPin1.gpioWrite(model.getMotor1Dir());
-  // dirPin2.gpioWrite(model.getMotor2Dir());
-  // model.timeStep();
   i += 1;
 }
 
+int stepCount1 = 0;
+int stepCount2 = 0;
+
 void modelCallback(void *) {
   if (MATSE::MCT::PlotData::isPlotting) {
-    // stepPin1.gpioWrite(model.getMotor1Step());
-    // stepPin2.gpioWrite(model.getMotor2Step());
-    red_led.gpioWrite(model.getMotor1Step());
-    blue_led.gpioWrite(model.getMotor2Step());
+    auto step1 = model.getMotor1Step();
+    auto step2 = model.getMotor2Step();
+    stepCount1 += step1;
+    stepCount2 += step2;
+    stepPin1.gpioWrite(step1);
+    stepPin2.gpioWrite(step2);
+    red_led.gpioWrite(step1);
+    blue_led.gpioWrite(step2);
     dirPin1.gpioWrite(model.getMotor1Dir());
     dirPin2.gpioWrite(model.getMotor2Dir());
     model.timeStep();
+    callback2_i += 1;
+
+    // if (callback2_i % 400 == 0) {
+    //   snprintf(textBuffer, sizeof(textBuffer), "1:%d 2:%d", stepCount1,
+    //            stepCount2);
+    //   uGUIDrawer::gui->PutString(0, 0, textBuffer);
+    // }
   }
+  // if (callback2_i <= 400) {
+  //   stepPin1.gpioWrite(callback2_i % 2 == 0);
+  //   red_led.gpioWrite(callback2_i % 2 == 0);
+  //   callback2_i += 1;
+  // }
 }
 
 int main() {
@@ -155,30 +164,17 @@ int main() {
   joy_X.adcMode(ADC::ADC_10_BIT);
 
   addAlexanderZibert();
+  addFrame();
+
   MATSE::MCT::Machine machine{&model};
   machine.start();
 
-  // MATSE::MCT::Buffer buffer{};
-  // for (int i = 0; i < 128 * 128; i += 1) {
-  //   if (i % 5 == 0) {
-  //     buffer[i] = true;
-  //   }
-  // }
-  // machine.drawer.print(buffer, C_HOT_PINK, C_INDIGO);
-  // textBuffer[10] = 0;
-  // const int start = 17;
-  // for (int i = start; i < 100; i += 1) {
-  //   textBuffer[(i - start) % 10] = i;
-  //   if ((i - start) % 10 == 0) {
-  //     machine.drawer.print(textBuffer);
-  //   }
-  // }
   timer_msp432 timer;
-  timer.setPeriod(10 * 1000, TIMER::PERIODIC);
+  timer.setPeriod(100 * 1000, TIMER::PERIODIC);
   timer.setCallback(callback, &machine);
 
   timer_msp432 timer2(TIMER32_2);
-  timer2.setPeriod(5000, TIMER::PERIODIC);
+  timer2.setPeriod(500, TIMER::PERIODIC);
   timer2.setCallback(modelCallback, nullptr);
 
   timer.start();

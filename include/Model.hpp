@@ -29,11 +29,6 @@ public:
     if (hasReachedTarget()) {
       return;
     }
-    // const auto currentX = getCurrentX();
-    // const auto currentY = getCurrentY();
-    // const auto length = std::sqrt(std::pow(targetX - currentX, 2) +
-    //                               std::pow(targetY - currentY, 2));
-    // const auto numIntervals = std::ceil(length / max_draw_length);
 
     const auto x = startX + currentInterval / numIntervals * (targetX - startX);
     const auto y = startY + currentInterval / numIntervals * (targetY - startY);
@@ -148,18 +143,18 @@ public:
   bool dir_2 = false;
   bool penPressed = false;
 
-  const double L = 527 - 29;
-  const int steps_per_revolution = 200;
-  const int microstep_factor = 1;
-  const double revolution_length = 50;
-  const double step_length =
+  static constexpr double L = 527 - 29;
+  static constexpr int steps_per_revolution = 200;
+  static constexpr int microstep_factor = 1;
+  static constexpr double revolution_length = 50;
+  static constexpr double step_length =
       revolution_length / (steps_per_revolution * microstep_factor);
-  const double l1_start = 400;
-  const double l2_start = 400;
-  const double x_max = L;
-  const double y_max = 470;
-  const double margin = 70;
-  const double max_draw_length = 2;
+  static constexpr double l1_start = 400;
+  static constexpr double l2_start = 400;
+  static constexpr double x_max = L;
+  static constexpr double y_max = 470;
+  static constexpr double margin = 120;
+  static constexpr double max_draw_length = 4;
 };
 
 } // namespace MATSE::MCT

@@ -15,19 +15,19 @@ void DrawDefault::entry() noexcept {
   base->drawer.printDebug("default.entry");
   base->drawer.print(DrawData::buffer, C_BLACK, C_WHITE);
   base->drawer.print(DrawData::cursor);
-  base->drawer.printDrawProgress(0);
   DrawData::plotData.addPoint({DrawData::cursor.x, DrawData::cursor.y, false});
+  base->drawer.printDrawProgress(DrawData::plotData.dataIndex);
 }
 void DrawDefault::exit() noexcept { base->drawer.printDebug("default.exit"); }
 
 void DrawDefault::on(a_button_up) noexcept {
   if (DrawData::pressed) {
     DrawData::pressed = false;
-    DrawData::plotData.addPoint({DrawData::cursor.x, DrawData::cursor.y, true});
-  } else {
-    DrawData::pressed = true;
     DrawData::plotData.addPoint(
         {DrawData::cursor.x, DrawData::cursor.y, false});
+  } else {
+    DrawData::pressed = true;
+    DrawData::plotData.addPoint({DrawData::cursor.x, DrawData::cursor.y, true});
   }
 }
 void DrawDefault::on(b_button_up) noexcept { base->transition(DrawMenu{base}); }
@@ -55,7 +55,9 @@ void DrawDefault::on(JoystickSample e) noexcept {
       DrawData::plotData.addPoint(
           {DrawData::cursor.x, DrawData::cursor.y, true});
       DrawData::lastJoystickSample = e;
-      base->drawer.printDrawProgress(DrawData::plotData.dataIndex);
+      if (DrawData::plotData.dataIndex % 10 == 0) {
+        base->drawer.printDrawProgress(DrawData::plotData.dataIndex);
+      }
     }
   } else {
     base->drawer.print(cursorCopy,

@@ -13,7 +13,7 @@ void GalleryDefault::entry() noexcept {
     base->drawer.gui->PutString(10, 64, "No Drawings!");
   } else {
     base->drawer.gui->FillScreen(C_WHITE);
-
+    GalleryData::buffer.reset();
     for (auto i = GalleryData::getStartIndex(); i < GalleryData::getEndIndex();
          i += 1) {
       const auto startX = (i % 2) * 63;
@@ -35,20 +35,13 @@ void GalleryDefault::entry() noexcept {
           continue;
         }
         const auto &point2 = plotPoints.data[i + 1];
-        base->drawer.gui->DrawLine(scaleX(point1.x), scaleY(point1.y),
-                                   scaleX(point2.x), scaleY(point2.y), C_BLACK);
-      }
-      const auto x_min = startX + margin - 1;
-      const auto x_max = startX + margin + width + 1;
-      const auto y_min = startY + margin - 1;
-      const auto y_max = startY + margin + width + 1;
-      if (i == GalleryData::getCurrentIndex()) {
-        base->drawer.gui->DrawFrame(x_min, y_min, x_max, y_max, C_BLACK);
-      } else {
-        base->drawer.gui->DrawFrame(x_min, y_min, x_max, y_max, C_GRAY);
+        drawLine({scaleX(point1.x), scaleY(point1.y)},
+                 {scaleX(point2.x), scaleY(point2.y)},
+                 [](auto p) { GalleryData::buffer[p.y * 128 + p.x] = true; });
       }
     }
-
+    base->drawer.print(GalleryData::buffer, C_BLACK, C_WHITE);
+    drawBorders();
     base->drawer.printPage(GalleryData::getCurrentPage(),
                            GalleryData::getNumPages());
   }

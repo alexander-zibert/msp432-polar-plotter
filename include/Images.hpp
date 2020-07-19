@@ -71,4 +71,17 @@ void addAlexanderZibert() {
   GalleryData::addImage(plotPoints);
 }
 
+void addFrame() {
+  PlotPoints plotPoints;
+  const std::array points{
+      TracePoint{0, 0, false},  TracePoint{0, 0, true},
+      TracePoint{127, 0, true}, TracePoint{127, 127, true},
+      TracePoint{0, 127, true}, TracePoint{0, 0, true},
+  };
+  for (const auto &p : points) {
+    plotPoints.addPoint(p);
+  }
+  GalleryData::addImage(plotPoints);
+}
+
 #endif

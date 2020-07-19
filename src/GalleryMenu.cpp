@@ -1,5 +1,6 @@
 #include "Data.hpp"
 #include "Machine.hpp"
+#include "util.hpp"
 
 namespace MATSE::MCT {
 
@@ -18,6 +19,34 @@ void GalleryMenu::on(a_button_up) noexcept {
   }
   if (menu.getCurrent() == menu_state::EXIT) {
     base->transition(Start{base});
+  }
+  if (menu.getCurrent() == menu_state::EDIT) {
+    const auto &plotPoints = GalleryData::images[GalleryData::currentIndex];
+    for (int i = 0; i < plotPoints.dataIndex - 1; i += 1) {
+      const auto &point1 = plotPoints.data[i];
+      if (!point1.pressed) {
+        continue;
+      }
+      const auto &point2 = plotPoints.data[i + 1];
+      drawLine({point1.x, point1.y}, {point2.x, point2.y},
+               [](auto p) { DrawData::buffer[p.y * 128 + p.x] = true; });
+    }
+    DrawData::plotData = plotPoints;
+    base->transition(Draw{base});
+  }
+  if (menu.getCurrent() == menu_state::PLOT) {
+    const auto &plotPoints = GalleryData::images[GalleryData::currentIndex];
+    for (int i = 0; i < plotPoints.dataIndex - 1; i += 1) {
+      const auto &point1 = plotPoints.data[i];
+      if (!point1.pressed) {
+        continue;
+      }
+      const auto &point2 = plotPoints.data[i + 1];
+      drawLine({point1.x, point1.y}, {point2.x, point2.y},
+               [](auto p) { PlotData::buffer[p.y * 128 + p.x] = true; });
+    }
+    PlotData::plotData = plotPoints;
+    base->transition(Plot{base});
   }
 }
 

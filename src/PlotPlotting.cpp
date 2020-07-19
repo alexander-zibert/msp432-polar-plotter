@@ -1,5 +1,6 @@
 #include "Data.hpp"
 #include "Machine.hpp"
+#include "Model.hpp"
 #include "util.hpp"
 
 namespace MATSE::MCT {
@@ -9,18 +10,18 @@ struct Point2D {
   double y;
 };
 
-constexpr double margin = 70;
-constexpr double x_max = 527 - 29;
-constexpr double y_max = 470;
+constexpr double margin = Model::margin + 1;
+constexpr double x_max = Model::x_max;
+constexpr double y_max = Model::y_max;
 
 Point2D transformToModel(Point2D p) {
-  return {transform(0, 127, margin, x_max, p.x),
-          transform(0, 127, margin, y_max, p.y)};
+  return {transform(0, 127, margin, x_max - margin, p.x),
+          transform(0, 127, margin, y_max - margin, p.y)};
 }
 
 Point transformToLCD(Point2D p) {
-  return {(uint8_t)transform(margin, x_max, 0, 127, p.x),
-          (uint8_t)transform(margin, y_max, 0, 127, p.y)};
+  return {(uint8_t)transform(margin, x_max - margin, 0, 127, p.x),
+          (uint8_t)transform(margin, y_max - margin, 0, 127, p.y)};
 }
 
 void PlotPlotting::entry() noexcept {
@@ -28,14 +29,6 @@ void PlotPlotting::entry() noexcept {
   PlotData::isPlotting = true;
   lastModelPoint =
       transformToLCD({base->model->getCurrentX(), base->model->getCurrentY()});
-  // for (int i = 0; i < PlotData::plotData.dataIndex - 1; i += 1) {
-  //   auto p1 = PlotData::plotData.data[i];
-  //   auto p2 = PlotData::plotData.data[i + 1];
-  //   if (!p1.pressed) {
-  //     continue;
-  //   }
-  //   base->drawer.gui->DrawLine(p1.x, p1.y, p2.x, p2.y, C_BLACK);
-  // }
 }
 
 void PlotPlotting::exit() noexcept {
@@ -51,13 +44,13 @@ void PlotPlotting::on(timestep) noexcept {
   auto model = base->model;
   const auto newModelPoint =
       transformToLCD({base->model->getCurrentX(), base->model->getCurrentY()});
-  if (PlotData::plotData.data[std::max((int)PlotData::plotIndex - 1, 0)]
+  if (PlotData::plotData.data[std::max((int)PlotData::plotIndex - 2, 0)]
           .pressed) {
     base->drawer.gui->DrawLine(lastModelPoint.x, lastModelPoint.y,
                                newModelPoint.x, newModelPoint.y, C_BLACK);
   } else {
-    base->drawer.gui->DrawLine(lastModelPoint.x, lastModelPoint.y,
-                               newModelPoint.x, newModelPoint.y, C_GRAY);
+    // base->drawer.gui->DrawLine(lastModelPoint.x, lastModelPoint.y,
+    //                            newModelPoint.x, newModelPoint.y, C_GRAY);
   }
   lastModelPoint = newModelPoint;
 
@@ -69,18 +62,10 @@ void PlotPlotting::on(timestep) noexcept {
   }
   base->drawer.printPlotProgress(PlotData::plotIndex,
                                  PlotData::plotData.dataIndex - 1);
-  const auto point = PlotData::plotData.data[PlotData::plotIndex++];
-  // base->drawer.debugPlot(curPoint, point);
-  // base->drawer.debugModel(*model);
-  // base->drawer.debugTransform(
-  //     point.x, point.y, transform(0, 127, model->margin, model->x_max,
-  //     point.x), transform(0, 127, model->margin, model->y_max, point.y));
-  model->move(transform(0, 127, model->margin, model->x_max, point.x),
-              transform(0, 127, model->margin, model->y_max, point.y));
-  // if (curPoint.pressed) {
-  //   base->drawer.gui->DrawLine(curPoint.x, curPoint.y, point.x, point.y,
-  //                              C_BLACK);
-  // }
+  const auto point = PlotData::plotData.data[PlotData::plotIndex];
+  const auto modelPoint = transformToModel({point.x, point.y});
+  model->move(modelPoint.x, modelPoint.y);
+  PlotData::plotIndex += 1;
 }
 
 } // namespace MATSE::MCT

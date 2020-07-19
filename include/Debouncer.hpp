@@ -5,10 +5,10 @@
 #include <etl/debounce.h>
 
 namespace MATSE::MCT {
-constexpr int VALID_COUNT_BUTTON = 10;
+constexpr int VALID_COUNT_BUTTON = 3;
 constexpr int REPEAT_COUNT_BUTTON = 500;
-constexpr int VALID_COUNT_JOYSTICK = 10;
-constexpr int REPEAT_COUNT_JOYSTICK = 10;
+constexpr int VALID_COUNT_JOYSTICK = 3;
+constexpr int REPEAT_COUNT_JOYSTICK = 3;
 
 template <int VALID_COUNT = VALID_COUNT_BUTTON,
           int REPEAT_COUNT = REPEAT_COUNT_BUTTON>
