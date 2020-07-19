@@ -16,17 +16,18 @@ void DrawDefault::entry() noexcept {
   base->drawer.print(DrawData::buffer, C_BLACK, C_WHITE);
   base->drawer.print(DrawData::cursor);
   base->drawer.printDrawProgress(0);
+  DrawData::plotData.addPoint({DrawData::cursor.x, DrawData::cursor.y, false});
 }
 void DrawDefault::exit() noexcept { base->drawer.printDebug("default.exit"); }
 
 void DrawDefault::on(a_button_up) noexcept {
   if (DrawData::pressed) {
     DrawData::pressed = false;
-    DrawData::plotData.addPoint(
-        {DrawData::cursor.x, DrawData::cursor.y, false});
+    DrawData::plotData.addPoint({DrawData::cursor.x, DrawData::cursor.y, true});
   } else {
     DrawData::pressed = true;
-    DrawData::plotData.addPoint({DrawData::cursor.x, DrawData::cursor.y, true});
+    DrawData::plotData.addPoint(
+        {DrawData::cursor.x, DrawData::cursor.y, false});
   }
 }
 void DrawDefault::on(b_button_up) noexcept { base->transition(DrawMenu{base}); }

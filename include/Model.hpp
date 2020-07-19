@@ -16,6 +16,12 @@ public:
   void move(double x, double y) {
     targetX = x;
     targetY = y;
+    startX = getCurrentX();
+    startY = getCurrentY();
+    const auto length = std::sqrt(std::pow(targetX - startX, 2) +
+                                  std::pow(targetY - startY, 2));
+    numIntervals = std::ceil(length / max_draw_length);
+    currentInterval = 1;
     doMoveStep();
   }
 
@@ -23,25 +29,25 @@ public:
     if (hasReachedTarget()) {
       return;
     }
-    const auto currentX = getCurrentX();
-    const auto currentY = getCurrentY();
-    const auto length = std::sqrt(std::pow(targetX - currentX, 2) +
-                                  std::pow(targetY - currentY, 2));
-    const auto numIntervals = std::ceil(length / max_draw_length);
+    // const auto currentX = getCurrentX();
+    // const auto currentY = getCurrentY();
+    // const auto length = std::sqrt(std::pow(targetX - currentX, 2) +
+    //                               std::pow(targetY - currentY, 2));
+    // const auto numIntervals = std::ceil(length / max_draw_length);
 
-    const auto x = currentX + (targetX - currentX) / numIntervals;
-    const auto y = currentY + (targetY - currentY) / numIntervals;
+    const auto x = startX + currentInterval / numIntervals * (targetX - startX);
+    const auto y = startY + currentInterval / numIntervals * (targetY - startY);
+    // const auto y = currentY + (targetY - currentY) / numIntervals;
     const auto new_l1 = std::sqrt(x * x + y * y);
     const auto new_l2 = std::sqrt(std::pow(L - x, 2) + y * y);
-    const auto old_l1 = getL1();
-    const auto old_l2 = getL2();
     const auto steps_l1 = (new_l1 - getL1()) / step_length;
     const auto steps_l2 = (new_l2 - getL2()) / step_length;
-    to_go_1 = static_cast<int>(std::floor(std::abs(steps_l1)) * 2);
-    to_go_2 = static_cast<int>(std::floor(std::abs(steps_l2)) * 2);
+    to_go_1 = static_cast<int>(std::round(std::abs(steps_l1)) * 2);
+    to_go_2 = static_cast<int>(std::round(std::abs(steps_l2)) * 2);
     dir_1 = steps_l1 >= 0 ? true : false;
     dir_2 = steps_l2 >= 0 ? true : false;
     // printf("length: %f, numIntervals: %f\n", length, numIntervals);
+    currentInterval += 1;
   }
 
   bool hasReachedTarget() const noexcept {
@@ -128,6 +134,11 @@ public:
 public:
   double targetX;
   double targetY;
+  double startX{};
+  double startY{};
+  double numIntervals{};
+  double currentInterval{};
+
   int currentStep1 = 0;
   int currentStep2 = 0;
 
@@ -148,7 +159,7 @@ public:
   const double x_max = L;
   const double y_max = 470;
   const double margin = 70;
-  const double max_draw_length = 1.0;
+  const double max_draw_length = 2;
 };
 
 } // namespace MATSE::MCT

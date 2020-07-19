@@ -55,7 +55,8 @@ void PlotPlotting::on(timestep) noexcept {
   auto model = base->model;
   const auto newModelPoint =
       transformToLCD({base->model->getCurrentX(), base->model->getCurrentY()});
-  if (PlotData::plotData.data[PlotData::plotIndex - 2].pressed) {
+  if (PlotData::plotData.data[std::max((int)PlotData::plotIndex - 1, 0)]
+          .pressed) {
     base->drawer.gui->DrawLine(lastModelPoint.x, lastModelPoint.y,
                                newModelPoint.x, newModelPoint.y, C_BLACK);
   } else {
@@ -70,10 +71,8 @@ void PlotPlotting::on(timestep) noexcept {
   if (PlotData::plotIndex == PlotData::plotData.dataIndex) {
     return;
   }
-
   base->drawer.printPlotProgress(PlotData::plotIndex,
-                                 PlotData::plotData.dataIndex);
-  const auto curPoint = PlotData::curPoint;
+                                 PlotData::plotData.dataIndex - 1);
   const auto point = PlotData::plotData.data[PlotData::plotIndex++];
   // base->drawer.debugPlot(curPoint, point);
   // base->drawer.debugModel(*model);
@@ -86,8 +85,6 @@ void PlotPlotting::on(timestep) noexcept {
   //   base->drawer.gui->DrawLine(curPoint.x, curPoint.y, point.x, point.y,
   //                              C_BLACK);
   // }
-
-  PlotData::curPoint = point;
 }
 
 } // namespace MATSE::MCT
