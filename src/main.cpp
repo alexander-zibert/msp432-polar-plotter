@@ -16,6 +16,7 @@
 #include "Data.hpp"
 #include "Debouncer.hpp"
 #include "DrawInterface.hpp"
+#include "Images.hpp"
 #include "Machine.hpp"
 #include "Model.hpp"
 
@@ -153,6 +154,7 @@ int main() {
   joy_Y.adcMode(ADC::ADC_10_BIT);
   joy_X.adcMode(ADC::ADC_10_BIT);
 
+  addAlexanderZibert();
   MATSE::MCT::Machine machine{&model};
   machine.start();
 

@@ -76,6 +76,13 @@ public:
     lcd->drawArea(0, 0, 127, 127, ps);
   }
 
+  void printPage(uint8_t current, uint8_t max) {
+    gui->SetBackcolor(C_WHITE);
+    gui->SetForecolor(C_BLACK);
+    snprintf(textBuffer, sizeof(textBuffer), "%d/%d", current, max);
+    gui->PutString(50, 120, textBuffer);
+  }
+
   void printDrawProgress(int number) {
     if (number % 100 == 0) {
       snprintf(textBuffer, sizeof(textBuffer), "%d%%",

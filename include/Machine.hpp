@@ -1,5 +1,5 @@
-#ifndef MATSE_MCT_VARIANT_HPP
-#define MATSE_MCT_VARIANT_HPP
+#ifndef MATSE_MCT_MACHINE_HPP
+#define MATSE_MCT_MACHINE_HPP
 
 #include <type_traits>
 #include <variant>
@@ -206,7 +206,67 @@ struct Plot : public CompositeState<PlotState> {
   static constexpr const char *name = "Plot";
 };
 
-using State = std::variant<Start, Draw, Plot>;
+struct GalleryMenu : public LeafState {
+  Machine *base;
+
+  GalleryMenu(Machine *base) : base{base} {}
+
+  template <typename Event> void on(Event) {}
+
+  void entry() noexcept;
+  void exit() noexcept;
+
+  void on(a_button_up) noexcept;
+  void on(b_button_up) noexcept;
+  void on(joystick_up) noexcept;
+  void on(joystick_down) noexcept;
+
+  enum class menu_state { BACK, DELETE, PLOT, EDIT, EXIT, NUM_ITEMS };
+  Menu<menu_state, menu_state::BACK> menu{
+      {"Back", "Delete", "Plot", "Edit", "Exit"}};
+
+  static constexpr const char *name = "GalleryMenu";
+};
+
+struct GalleryDefault : public LeafState {
+  Machine *base;
+
+  GalleryDefault(Machine *base) : base{base} {}
+
+  template <typename Event> void on(Event) {}
+
+  void on(a_button_up) noexcept;
+  void on(b_button_up) noexcept;
+
+  void on(joystick_left) noexcept;
+  void on(joystick_right) noexcept;
+  void on(joystick_up) noexcept;
+  void on(joystick_down) noexcept;
+
+  void entry() noexcept;
+  void exit() noexcept;
+
+  static constexpr const char *name = "GalleryDefault";
+
+private:
+  void drawBorders() noexcept;
+};
+
+using GalleryState = std::variant<GalleryDefault, GalleryMenu>;
+
+struct Gallery : public CompositeState<GalleryState> {
+  using super_t = CompositeState<GalleryState>;
+  Machine *base;
+
+  Gallery(Machine *base);
+
+  void enterCompositeState() noexcept override;
+  void exitCompositeState() noexcept override;
+
+  static constexpr const char *name = "Gallery";
+};
+
+using State = std::variant<Start, Draw, Plot, Gallery>;
 struct Machine : public CompositeState<State> {
   using super_t = CompositeState<State>;
   Machine(Model *model);

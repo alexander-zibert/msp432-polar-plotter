@@ -14,7 +14,7 @@ void Start::on(a_button_up) noexcept {
     base->transition(Draw{base});
   }
   if (menu.getCurrent() == menu_state::GALLERY) {
-    base->transition(Draw{base});
+    base->transition(Gallery{base});
   }
 }
 void Start::on(joystick_up) noexcept {
