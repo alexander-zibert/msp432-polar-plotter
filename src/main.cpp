@@ -165,12 +165,15 @@ int main() {
 
   addAlexanderZibert();
   addFrame();
+  addAachen();
+  addSmiley();
+  addPolarPlotter();
 
   MATSE::MCT::Machine machine{&model};
   machine.start();
 
   timer_msp432 timer;
-  timer.setPeriod(100 * 1000, TIMER::PERIODIC);
+  timer.setPeriod(50 * 1000, TIMER::PERIODIC);
   timer.setCallback(callback, &machine);
 
   timer_msp432 timer2(TIMER32_2);
