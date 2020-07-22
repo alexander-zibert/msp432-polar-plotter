@@ -8,50 +8,67 @@
 namespace MATSE::MCT {
 class Model {
 public:
-  Model() {
-    targetX = getCurrentX();
-    targetY = getCurrentY();
-  }
-
   void move(double x, double y) {
-    targetX = x;
-    targetY = y;
-    startX = getCurrentX();
-    startY = getCurrentY();
-    const auto length = std::sqrt(std::pow(targetX - startX, 2) +
-                                  std::pow(targetY - startY, 2));
-    numIntervals = std::ceil(length / max_draw_length);
-    currentInterval = 1;
-    doMoveStep();
-  }
+    target_x = x;
+    target_y = y;
 
-  void doMoveStep() {
-    if (hasReachedTarget()) {
+    const auto current_x = getCurrentX();
+    const auto current_y = getCurrentY();
+    const auto length = std::sqrt(std::pow(target_x - current_x, 2) +
+                                  std::pow(target_y - current_y, 2));
+    if (length <= 2 * step_length) {
       return;
     }
+    const auto numIntervals = std::ceil(length / max_draw_length);
+    x = current_x + (target_x - current_x) / numIntervals;
+    y = current_y + (target_y - current_y) / numIntervals;
 
-    const auto x = startX + currentInterval / numIntervals * (targetX - startX);
-    const auto y = startY + currentInterval / numIntervals * (targetY - startY);
-    // const auto y = currentY + (targetY - currentY) / numIntervals;
     const auto new_l1 = std::sqrt(x * x + y * y);
     const auto new_l2 = std::sqrt(std::pow(L - x, 2) + y * y);
     const auto steps_l1 = (new_l1 - getL1()) / step_length;
     const auto steps_l2 = (new_l2 - getL2()) / step_length;
-    to_go_1 = static_cast<int>(std::round(std::abs(steps_l1)) * 2);
-    to_go_2 = static_cast<int>(std::round(std::abs(steps_l2)) * 2);
+    const auto steps1 = static_cast<int>(std::round(std::abs(steps_l1)));
+    const auto steps2 = static_cast<int>(std::round(std::abs(steps_l2)));
     dir_1 = steps_l1 >= 0 ? true : false;
     dir_2 = steps_l2 >= 0 ? true : false;
-    // printf("length: %f, numIntervals: %f\n", length, numIntervals);
-    currentInterval += 1;
+    should_step_1 = false;
+    should_step_2 = false;
+    i_1 = 0;
+    i_2 = 0;
+    if (steps1 == 0) {
+      time_step = 1;
+      steps_needed = steps2;
+      time_step_1 = steps_needed * 2;
+      time_step_2 = 1;
+      motor1 = 0;
+      motor2 = 2 * time_step;
+      return;
+    }
+    if (steps2 == 0) {
+      time_step = 1;
+      steps_needed = steps1;
+      time_step_1 = 1;
+      time_step_2 = steps_needed * 2;
+      motor1 = 2 * time_step;
+      motor2 = 0;
+      return;
+    }
+
+    time_step = std::min(steps1, steps2);
+    steps_needed = std::max(steps1, steps2);
+    time_step_1 = steps2 * 10;
+    time_step_2 = steps1 * 10;
+    motor1 = 2 * time_step;
+    motor2 = 2 * time_step;
+    if (steps1 <= steps2) {
+      motor1 += time_step_1;
+    } else {
+      motor2 += time_step_2;
+    }
   }
 
   bool hasReachedTarget() const noexcept {
-    const auto length = std::sqrt(std::pow(targetX - getCurrentX(), 2) +
-                                  std::pow(targetY - getCurrentY(), 2));
-    if (length <= 5 * step_length) {
-      return true;
-    }
-    return false;
+    return (i_1 >= steps_needed || i_2 >= steps_needed);
   }
 
   double getL1() const noexcept {
@@ -65,46 +82,42 @@ public:
   void penDown() { penPressed = true; }
 
   void timeStep() {
-    if (to_go_1 > 0 && to_go_1 % 2 == 0) {
-      if (dir_1) {
-        currentStep1 += 1;
-      } else {
-        currentStep1 -= 1;
-      }
+    if (hasReachedTarget()) {
+      should_step_1 = false;
+      should_step_2 = false;
+      return;
     }
-    if (to_go_2 > 0 && to_go_2 % 2 == 0) {
-      if (dir_2) {
-        currentStep2 += 1;
-      } else {
-        currentStep2 -= 1;
-      }
+
+    auto new_i_1 = motor1 / (2 * time_step_1);
+    should_step_1 = new_i_1 > i_1;
+    i_1 = new_i_1;
+
+    auto new_i_2 = motor2 / (2 * time_step_2);
+    should_step_2 = new_i_2 > i_2;
+    i_2 = new_i_2;
+
+    if (should_step_1) {
+      currentStep1 += dir_1 ? 1 : -1;
     }
-    to_go_1 = std::max(0, to_go_1 - 1);
-    to_go_2 = std::max(0, to_go_2 - 1);
-    if (to_go_1 == 0 && to_go_2 == 0) {
-      doMoveStep();
+    if (should_step_2) {
+      currentStep2 += dir_2 ? 1 : -1;
+    }
+
+    motor1 += time_step;
+    motor2 += time_step;
+
+    if (hasReachedTarget()) {
+      should_step_1 = false;
+      should_step_2 = false;
+      // recalc
+      move(target_x, target_y);
+      return;
     }
   }
 
-  bool getMotor1Step() const noexcept {
-    if (!isInDrawingArea()) {
-      return false;
-    }
-    if (to_go_1 == 0) {
-      return false;
-    }
-    return to_go_1 % 2 == 0;
-  }
+  bool getMotor1Step() const noexcept { return should_step_1; }
   bool getMotor1Dir() const noexcept { return dir_1; }
-  bool getMotor2Step() const noexcept {
-    if (!isInDrawingArea()) {
-      return false;
-    }
-    if (to_go_2 == 0) {
-      return false;
-    }
-    return to_go_2 % 2 == 0;
-  }
+  bool getMotor2Step() const noexcept { return should_step_2; }
   bool getMotor2Dir() const noexcept { return dir_2; }
   bool servoPosition() const noexcept { return penPressed; }
 
@@ -127,21 +140,26 @@ public:
   }
 
 public:
-  double targetX;
-  double targetY;
-  double startX{};
-  double startY{};
-  double numIntervals{};
-  double currentInterval{};
+  double target_x{};
+  double target_y{};
 
   int currentStep1 = 0;
   int currentStep2 = 0;
 
-  int to_go_1 = 0;
-  int to_go_2 = 0;
   bool dir_1 = false;
   bool dir_2 = false;
   bool penPressed = false;
+
+  int i_1{};
+  int i_2{};
+  int time_step{};
+  int steps_needed{};
+  int time_step_1{};
+  int time_step_2{};
+  int motor1{};
+  int motor2{};
+  bool should_step_1{false};
+  bool should_step_2{false};
 
   static constexpr double L = 527 - 29;
   static constexpr int steps_per_revolution = 200;
@@ -154,7 +172,7 @@ public:
   static constexpr double x_max = L;
   static constexpr double y_max = 470;
   static constexpr double margin = 120;
-  static constexpr double max_draw_length = 4;
+  static constexpr double max_draw_length = 10;
 };
 
 } // namespace MATSE::MCT

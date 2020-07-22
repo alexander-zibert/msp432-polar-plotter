@@ -3,3 +3,4 @@
 *.map
 build/*
 .vscode/
+*.csv

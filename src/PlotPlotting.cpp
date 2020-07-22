@@ -60,8 +60,8 @@ void PlotPlotting::on(timestep) noexcept {
   if (PlotData::plotIndex == PlotData::plotData.dataIndex) {
     return;
   }
-  base->drawer.printPlotProgress(PlotData::plotIndex,
-                                 PlotData::plotData.dataIndex - 1);
+  // base->drawer.printPlotProgress(PlotData::plotIndex,
+  //                                PlotData::plotData.dataIndex - 1);
   const auto point = PlotData::plotData.data[PlotData::plotIndex];
   const auto modelPoint = transformToModel({point.x, point.y});
   model->move(modelPoint.x, modelPoint.y);

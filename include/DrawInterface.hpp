@@ -107,11 +107,11 @@ public:
     gui->ConsolePutString(textBuffer);
   }
 
-  void debugModel(const Model &model) {
-    snprintf(textBuffer, sizeof(textBuffer), "(%.1f, %.1f)\n", model.targetX,
-             model.targetY);
-    gui->ConsolePutString(textBuffer);
-  }
+  // void debugModel(const Model &model) {
+  //   snprintf(textBuffer, sizeof(textBuffer), "(%.1f, %.1f)\n", model.targetX,
+  //            model.targetY);
+  //   gui->ConsolePutString(textBuffer);
+  // }
 
   void debugTransform(uint8_t x1, uint8_t y1, double x2, double y2) {
     snprintf(textBuffer, sizeof(textBuffer), "(%d,%d)->(%.0f,%.0f)\n", x1, y1,
