@@ -49,11 +49,9 @@ void PlotPlotting::on(timestep) noexcept {
           .pressed) {
     base->drawer.gui->DrawLine(lastModelPoint.x, lastModelPoint.y,
                                newModelPoint.x, newModelPoint.y, C_BLACK);
-    model->penPressed = true;
+    model->penDown();
   } else {
-    // base->drawer.gui->DrawLine(lastModelPoint.x, lastModelPoint.y,
-    //                            newModelPoint.x, newModelPoint.y, C_GRAY);
-    model->penPressed = false;
+    model->penUp();
   }
   lastModelPoint = newModelPoint;
 
@@ -63,10 +61,8 @@ void PlotPlotting::on(timestep) noexcept {
   if (PlotData::plotIndex == PlotData::plotData.dataIndex) {
     return;
   }
-  // base->drawer.printPlotProgress(PlotData::plotIndex,
-  //                                PlotData::plotData.dataIndex - 1);
   const auto point = PlotData::plotData.data[PlotData::plotIndex];
-  const auto modelPoint = transformToModel({point.x, point.y});
+  const auto modelPoint = transformToModel({(double)point.x, (double)point.y});
   model->move(modelPoint.x, modelPoint.y);
   PlotData::plotIndex += 1;
 }

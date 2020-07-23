@@ -128,10 +128,6 @@ struct Draw : public CompositeState<DrawState> {
 
   Draw(Machine *base);
 
-  // template <typename Event> void on(Event e) noexcept {
-  //   std::visit([&](auto &state) { state.on(e); }, currentState);
-  // }
-
   void enterCompositeState() noexcept override;
   void exitCompositeState() noexcept override;
 
@@ -167,7 +163,6 @@ struct PlotPlotting : public LeafState {
   template <typename Event> void on(Event) {}
 
   void on(a_button_up) noexcept;
-  // void on(b_button_up) noexcept;
   void on(timestep) noexcept;
 
   void entry() noexcept;

@@ -41,7 +41,7 @@ public:
     return;
   }
 
-  void printDebug(const char *s) {
+  void printDebug(const char *) {
     // gui->ConsolePutString(const_cast<char *>(s));
     return;
   }
@@ -94,29 +94,6 @@ public:
     gui->SetForecolor(C_BLACK);
     gui->SetBackcolor(C_WHITE);
     gui->PutString(50, 120, textBuffer);
-  }
-
-  void debugPlot(TracePoint from, TracePoint to) {
-    if (from.pressed) {
-      snprintf(textBuffer, sizeof(textBuffer), "[x] (%d,%d)->(%d,%d)\n", from.x,
-               from.y, to.x, to.y);
-    } else {
-      snprintf(textBuffer, sizeof(textBuffer), "[o] (%d,%d)->(%d,%d)\n", from.x,
-               from.y, to.x, to.y);
-    }
-    gui->ConsolePutString(textBuffer);
-  }
-
-  // void debugModel(const Model &model) {
-  //   snprintf(textBuffer, sizeof(textBuffer), "(%.1f, %.1f)\n", model.targetX,
-  //            model.targetY);
-  //   gui->ConsolePutString(textBuffer);
-  // }
-
-  void debugTransform(uint8_t x1, uint8_t y1, double x2, double y2) {
-    snprintf(textBuffer, sizeof(textBuffer), "(%d,%d)->(%.0f,%.0f)\n", x1, y1,
-             x2, y2);
-    gui->ConsolePutString(textBuffer);
   }
 
   void print(Point p, UG_COLOR c = C_BLACK) { gui->DrawPixel(p.x, p.y, c); }
