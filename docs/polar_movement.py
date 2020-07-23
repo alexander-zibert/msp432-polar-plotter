@@ -26,19 +26,22 @@ def paper_filter(points):
     return [xs, ys]
 
 
-for r in range(10, 800, 25):
+for r in [400]:
     x, y = semi_circle1(0, 470, r)
     x, y = paper_filter(zip(x, y))
     plt.plot(x, y, "b", alpha=0.5)
-
-for r in range(10, 800, 25):
+for r in [350, 450]:
+    x, y = semi_circle1(0, 470, r)
+    x, y = paper_filter(zip(x, y))
+    plt.plot(x, y, "gray", alpha=0.5)
+for r in [300]:
     x, y = semi_circle2(500, 470, r)
     x, y = paper_filter(zip(x, y))
     plt.plot(x, y, "b", alpha=0.5)
-
-plt.scatter([0, 500], [470, 470])
+plt.scatter([0, 500, 320], [470, 470, 230])
+plt.plot([0, 320, 500], [470, 230, 470])
 plt.gca().set_aspect('equal', adjustable='box')
 
 plt.tight_layout()
 plt.rcParams.update({'font.size': 28})
-plt.savefig("circles.png", dpi=600)
+plt.savefig("polar_movement.png", dpi=600)

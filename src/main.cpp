@@ -23,8 +23,8 @@
 gpio_msp432_pin s1(PORT_PIN(5, 1));
 gpio_msp432_pin s2(PORT_PIN(3, 5));
 
-gpio_msp432_pin dirPin1(PORT_PIN(6, 1));
-gpio_msp432_pin stepPin1(PORT_PIN(4, 0));
+gpio_msp432_pin dirPin1(PORT_PIN(3, 2));
+gpio_msp432_pin stepPin1(PORT_PIN(3, 3));
 gpio_msp432_pin dirPin2(PORT_PIN(4, 5));
 gpio_msp432_pin stepPin2(PORT_PIN(4, 7));
 
@@ -93,32 +93,37 @@ void callback(void *arg) {
 int stepCount1 = 0;
 int stepCount2 = 0;
 
+// The register TIMER_A0->CCR[2] controls the width of the PWM pulses.
+// When a CCR register is 0, the PWM pulses also have a length of 0.
+// When a CCR register is 2^16 (continous mode), the pulses have a length
+// of roughly 22ms. (min: 1500, max: 6600)
+constexpr uint16_t left = 6600;
+constexpr uint16_t right = 3500;
+
 void modelCallback(void *) {
   if (MATSE::MCT::PlotData::isPlotting) {
     auto step1 = model.getMotor1Step();
     auto step2 = model.getMotor2Step();
-    stepCount1 += step1;
-    stepCount2 += step2;
     stepPin1.gpioWrite(step1);
     stepPin2.gpioWrite(step2);
     red_led.gpioWrite(step1);
     blue_led.gpioWrite(step2);
     dirPin1.gpioWrite(model.getMotor1Dir());
     dirPin2.gpioWrite(model.getMotor2Dir());
+    if (model.isPressed()) {
+      TIMER_A0->CCR[2] = left;
+    } else {
+      TIMER_A0->CCR[2] = right;
+    }
     model.timeStep();
     callback2_i += 1;
-
-    // if (callback2_i % 400 == 0) {
-    //   snprintf(textBuffer, sizeof(textBuffer), "1:%d 2:%d", stepCount1,
-    //            stepCount2);
-    //   uGUIDrawer::gui->PutString(0, 0, textBuffer);
-    // }
+  } else {
+    TIMER_A0->CCR[2] = right;
+    stepPin1.gpioWrite(false);
+    stepPin2.gpioWrite(false);
+    red_led.gpioWrite(false);
+    blue_led.gpioWrite(false);
   }
-  // if (callback2_i <= 400) {
-  //   stepPin1.gpioWrite(callback2_i % 2 == 0);
-  //   red_led.gpioWrite(callback2_i % 2 == 0);
-  //   callback2_i += 1;
-  // }
 }
 
 int main() {
@@ -128,6 +133,14 @@ int main() {
   // Ying - Microcontroller Engineering - Table 7.9
   // P2.5 (servo) is now driven by TA0.2 (TIMER_A0, CCR 2)
   servo.setSEL(1);
+
+  // Configure TIMER_A0 to use SMCLK as clock source and UP mode.
+  TIMER_A0->CTL = TIMER_A_CTL_SSEL__SMCLK | TIMER_A_CTL_MC__CONTINUOUS;
+
+  // Configure the CCR registers TA0.2 to use output
+  // mode 7 (Reset/Set), which will result in a PWM pulse which
+  // has a length proportional to the related CCR register.
+  TIMER_A0->CCTL[2] = TIMER_A_CCTLN_OUTMOD_7;
 
   dirPin1.gpioMode(GPIO::OUTPUT);
   stepPin1.gpioMode(GPIO::OUTPUT);
@@ -177,7 +190,7 @@ int main() {
   timer.setCallback(callback, &machine);
 
   timer_msp432 timer2(TIMER32_2);
-  timer2.setPeriod(500, TIMER::PERIODIC);
+  timer2.setPeriod(5000, TIMER::PERIODIC);
   timer2.setCallback(modelCallback, nullptr);
 
   timer.start();

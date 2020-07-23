@@ -56,8 +56,8 @@ public:
 
     time_step = std::min(steps1, steps2);
     steps_needed = std::max(steps1, steps2);
-    time_step_1 = steps2 * 10;
-    time_step_2 = steps1 * 10;
+    time_step_1 = steps2;
+    time_step_2 = steps1;
     motor1 = 2 * time_step;
     motor2 = 2 * time_step;
     if (steps1 <= steps2) {
@@ -119,7 +119,7 @@ public:
   bool getMotor1Dir() const noexcept { return dir_1; }
   bool getMotor2Step() const noexcept { return should_step_2; }
   bool getMotor2Dir() const noexcept { return dir_2; }
-  bool servoPosition() const noexcept { return penPressed; }
+  bool isPressed() const noexcept { return penPressed; }
 
   bool isInDrawingArea() const noexcept {
     if (!(getCurrentX() > margin && getCurrentX() < x_max - margin)) {
@@ -161,7 +161,7 @@ public:
   bool should_step_1{false};
   bool should_step_2{false};
 
-  static constexpr double L = 527 - 29;
+  static constexpr double L = 527;
   static constexpr int steps_per_revolution = 200;
   static constexpr int microstep_factor = 1;
   static constexpr double revolution_length = 50;
@@ -170,8 +170,8 @@ public:
   static constexpr double l1_start = 400;
   static constexpr double l2_start = 400;
   static constexpr double x_max = L;
-  static constexpr double y_max = 470;
-  static constexpr double margin = 120;
+  static constexpr double y_max = x_max;
+  static constexpr double margin = 150;
   static constexpr double max_draw_length = 10;
 };
 

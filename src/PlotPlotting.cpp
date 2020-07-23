@@ -26,6 +26,7 @@ Point transformToLCD(Point2D p) {
 
 void PlotPlotting::entry() noexcept {
   base->drawer.printDebug("plot.plotting.entry\n");
+  PlotData::plotData.addPoint({150, 150, false});
   PlotData::isPlotting = true;
   lastModelPoint =
       transformToLCD({base->model->getCurrentX(), base->model->getCurrentY()});
@@ -48,9 +49,11 @@ void PlotPlotting::on(timestep) noexcept {
           .pressed) {
     base->drawer.gui->DrawLine(lastModelPoint.x, lastModelPoint.y,
                                newModelPoint.x, newModelPoint.y, C_BLACK);
+    model->penPressed = true;
   } else {
     // base->drawer.gui->DrawLine(lastModelPoint.x, lastModelPoint.y,
     //                            newModelPoint.x, newModelPoint.y, C_GRAY);
+    model->penPressed = false;
   }
   lastModelPoint = newModelPoint;
 

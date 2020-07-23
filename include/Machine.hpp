@@ -152,8 +152,8 @@ struct Start : public LeafState {
 
   template <typename Event> void on(Event) noexcept {}
 
-  enum class menu_state { DRAW, GALLERY, NUM_ITEMS };
-  Menu<menu_state, menu_state::DRAW> menu{{"Draw", "Gallery"}};
+  enum class menu_state { GALLERY, DRAW, NUM_ITEMS };
+  Menu<menu_state, menu_state::GALLERY> menu{{"Gallery", "Draw"}};
 
   static constexpr const char *name = "Start";
 };
